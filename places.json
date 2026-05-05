@@ -1,0 +1,84 @@
+[
+  {
+    "id": 1,
+    "name": "Poing",
+    "city": "Rotterdam",
+    "vibe": [
+      "underground",
+      "raw",
+      "young"
+    ],
+    "music": [
+      "techno"
+    ],
+    "open_late": true,
+    "price_level": 2,
+    "notes": "dirty underground energy, strong crowd"
+  },
+  {
+    "id": 2,
+    "name": "Maassilo",
+    "city": "Rotterdam",
+    "vibe": [
+      "warehouse",
+      "massive",
+      "event"
+    ],
+    "music": [
+      "techno",
+      "house"
+    ],
+    "open_late": true,
+    "price_level": 3,
+    "notes": "converted grain silo, serious acoustics"
+  },
+  {
+    "id": 3,
+    "name": "Anarc",
+    "city": "Rotterdam",
+    "vibe": [
+      "warehouse",
+      "massive",
+      "event"
+    ],
+    "music": [
+      "techno",
+      "house"
+    ],
+    "open_late": true,
+    "price_level": 3,
+    "notes": "converted grain silo, serious acoustics"
+  },
+  {
+    "id": 4,
+    "name": "Lasi",
+    "city": "Rotterdam",
+    "vibe": [
+      "warehouse",
+      "massive",
+      "event"
+    ],
+    "music": [
+      "techno",
+      "house"
+    ],
+    "open_late": true,
+    "price_level": 3,
+    "notes": "converted grain silo, serious acoustics"
+  },
+  {
+    "name": "Memo",
+    "city": "Rotterdam",
+    "vibe": [
+      "alternative",
+      "fancy"
+    ],
+    "music": [
+      "acid house"
+    ],
+    "notes": "",
+    "price_level": 2,
+    "open_late": true,
+    "id": 1778024185063
+  }
+]
