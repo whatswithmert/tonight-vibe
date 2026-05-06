@@ -85,4 +85,30 @@ app.delete('/admin/events/:id', (req, res) => {
   fs.writeFileSync(eventsFile, JSON.stringify(events, null, 2));
   res.json({ ok: true });
 });
+
+const multer = require('multer');
+const XLSX = require('xlsx');
+const upload = multer({ storage: multer.memoryStorage() });
+
+app.post('/admin/upload-events', upload.single('file'), (req, res) => {
+  const venue = req.body.venue;
+  const city = req.body.city || 'Rotterdam';
+  const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
+  const sheet = workbook.Sheets[workbook.SheetNames[0]];
+  const rows = XLSX.utils.sheet_to_json(sheet);
+  let added = 0;
+  let duplicates = [];
+  rows.forEach(row => {
+    const date = row['Date (YYYY-MM-DD)'] || row['date'];
+    const name = row['Event Name'] || row['name'];
+    if (!date || !name) return;
+    const duplicate = events.find(e => e.venue === venue && e.date === String(date) && e.name === name);
+    if (duplicate) { duplicates.push(name + ' on ' + date); return; }
+    const artists = row['Artists'] ? String(row['Artists']).split(',').map(s => s.trim()) : [];
+    events.push({ id: Date.now() + added, name, venue, city, date: String(date), artists, price: row['Price (€)'] || 0, url: row['Ticket URL'] || '' });
+    added++;
+  });
+  fs.writeFileSync(eventsFile, JSON.stringify(events, null, 2));
+  res.json({ added, duplicates });
+});
 app.listen(3000, () => console.log("Running"));

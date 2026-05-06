@@ -111,5 +111,41 @@ async function deleteEvent(id) {
   await fetch('/admin/events/' + id, { method: 'DELETE', headers: { 'x-admin-password': PASSWORD } });
   loadEvents();
 }
+</script>
+<h2 style="font-family:'Bebas Neue',sans-serif;letter-spacing:2px;color:#b8f250;margin-bottom:1rem;font-size:20px;margin-top:2rem;">UPLOAD EVENTS (EXCEL)</h2>
+<div class="form">
+  <label>VENUE NAME (must match exactly)</label>
+  <input id="uvenue" placeholder="Poing" />
+  <label>CITY</label>
+  <input id="ucity" value="Rotterdam" />
+  <label>EXCEL FILE</label>
+  <input type="file" id="ufile" accept=".xlsx" style="color:#d4cfc5" />
+  <br><br>
+  <button onclick="uploadExcel()">Upload Excel</button>
+  <div id="upload-result" style="margin-top:12px;font-size:12px;color:#666;"></div>
+</div>
+<script>
+async function uploadExcel() {
+  const venue = document.getElementById('uvenue').value;
+  const city = document.getElementById('ucity').value;
+  const file = document.getElementById('ufile').files[0];
+  if (!venue || !file) { alert('Venue and file required'); return; }
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('venue', venue);
+  formData.append('city', city);
+  const res = await fetch('/admin/upload-events', {
+    method: 'POST',
+    headers: { 'x-admin-password': PASSWORD },
+    body: formData
+  });
+  const result = await res.json();
+  let msg = result.added + ' events added.';
+  if (result.duplicates && result.duplicates.length > 0) {
+    msg += ' Duplicates skipped: ' + result.duplicates.join(', ');
+  }
+  document.getElementById('upload-result').textContent = msg;
+  loadEvents();
+}
 </script></body>
 </html>
