@@ -3,7 +3,7 @@ const app = express();
 app.use(express.json());
 const places = require("./places.json");
 
-app.get("/", (req, res) => { res.send("ok"); });
+
 app.get("/places", (req, res) => { res.json(places); });
 
 app.post("/plan", async (req, res) => {
