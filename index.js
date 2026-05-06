@@ -34,6 +34,15 @@ app.post("/plan", async (req, res) => {
 
 
 const fs = require('fs');
+
+app.use('/admin', (req, res, next) => {
+  const pass = req.headers['x-admin-password'];
+  if (pass !== process.env.ADMIN_PASSWORD) {
+    return res.status(401).json({ error: 'unauthorized' });
+  }
+  next();
+});
+
 app.use(express.static('public'));
 
 app.post('/admin/places', (req, res) => {

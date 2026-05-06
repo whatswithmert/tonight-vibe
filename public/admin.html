@@ -9,42 +9,65 @@ body { background: #0a0a0a; color: #e8e2d4; font-family: monospace; padding: 2re
 h1 { font-size: 18px; margin-bottom: 2rem; color: #c8f25e; }
 .form { background: #161616; border: 1px solid #2a2a2a; border-radius: 10px; padding: 1.5rem; margin-bottom: 2rem; }
 input, textarea { width: 100%; background: #0a0a0a; border: 1px solid #333; color: #e8e2d4; padding: 8px; border-radius: 6px; font-family: monospace; font-size: 13px; margin-bottom: 10px; }
-button { background: #c8f25e; color: #0a0a0a; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+button { background: #c8f25e; color: #0a0a0a; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-right: 8px; }
 .place-card { background: #161616; border: 1px solid #2a2a2a; border-radius: 8px; padding: 1rem; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
 .delete-btn { background: #ff4444; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
 label { font-size: 11px; color: #555; letter-spacing: 1px; display: block; margin-bottom: 4px; }
+#login-screen { max-width: 300px; margin: 100px auto; }
+#main-screen { display: none; }
 </style>
 </head>
 <body>
-<h1>tonight.vibe / admin</h1>
-<div class="form">
-  <label>NAME</label><input id="name" placeholder="Poing" />
-  <label>VIBE (comma separated)</label><input id="vibe" placeholder="underground, raw" />
-  <label>MUSIC (comma separated)</label><input id="music" placeholder="techno, house" />
-  <label>NOTES</label><textarea id="notes" rows="2"></textarea>
-  <label>PRICE LEVEL (1-3)</label><input id="price" type="number" value="2" />
-  <label>OPEN LATE (true/false)</label><input id="open_late" value="true" />
-  <br><button onclick="addPlace()">+ Add Place</button>
+<div id="login-screen">
+  <h1>tonight.vibe / admin</h1>
+  <br>
+  <label>PASSWORD</label>
+  <input type="password" id="password" placeholder="..." />
+  <br><br>
+  <button onclick="login()">Enter</button>
 </div>
-<div id="places-list"></div>
+
+<div id="main-screen">
+  <h1>tonight.vibe / admin</h1>
+  <div class="form">
+    <label>NAME</label><input id="name" placeholder="Poing" />
+    <label>VIBE (comma separated)</label><input id="vibe" placeholder="underground, raw" />
+    <label>MUSIC (comma separated)</label><input id="music" placeholder="techno, house" />
+    <label>NOTES</label><textarea id="notes" rows="2"></textarea>
+    <label>PRICE LEVEL (1-3)</label><input id="price" type="number" value="2" />
+    <label>OPEN LATE (true/false)</label><input id="open_late" value="true" />
+    <br><button onclick="addPlace()">+ Add Place</button>
+  </div>
+  <div id="places-list"></div>
+</div>
+
 <script>
+let PASSWORD = '';
+
+function login() {
+  PASSWORD = document.getElementById('password').value;
+  fetch('/places', { headers: { 'x-admin-password': PASSWORD } })
+    .then(r => { if (r.ok) { document.getElementById('login-screen').style.display='none'; document.getElementById('main-screen').style.display='block'; load(); } else { alert('Wrong password'); } });
+}
+
 async function load() {
-  const res = await fetch("/places");
+  const res = await fetch('/places');
   const places = await res.json();
-  document.getElementById("places-list").innerHTML = places.map(p =>
-    '<div class="place-card"><div><strong>' + p.name + '</strong><span style="color:#666;font-size:12px;margin-left:10px">' + (p.vibe||[]).join(", ") + '</span></div><button class="delete-btn" onclick="deletePlace(' + p.id + ')">delete</button></div>'
-  ).join("");
+  document.getElementById('places-list').innerHTML = places.map(p =>
+    '<div class="place-card"><div><strong>' + p.name + '</strong><span style="color:#666;font-size:12px;margin-left:10px">' + (p.vibe||[]).join(', ') + '</span></div><button class="delete-btn" onclick="deletePlace(' + p.id + ')">delete</button></div>'
+  ).join('');
 }
+
 async function addPlace() {
-  const body = { name: document.getElementById("name").value, city: "Rotterdam", vibe: document.getElementById("vibe").value.split(",").map(s=>s.trim()), music: document.getElementById("music").value.split(",").map(s=>s.trim()), notes: document.getElementById("notes").value, price_level: parseInt(document.getElementById("price").value), open_late: document.getElementById("open_late").value === "true" };
-  await fetch("/admin/places", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(body) });
+  const body = { name: document.getElementById('name').value, city: 'Rotterdam', vibe: document.getElementById('vibe').value.split(',').map(s=>s.trim()), music: document.getElementById('music').value.split(',').map(s=>s.trim()), notes: document.getElementById('notes').value, price_level: parseInt(document.getElementById('price').value), open_late: document.getElementById('open_late').value === 'true' };
+  await fetch('/admin/places', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-admin-password': PASSWORD }, body: JSON.stringify(body) });
   load();
 }
+
 async function deletePlace(id) {
-  await fetch("/admin/places/" + id, { method: "DELETE" });
+  await fetch('/admin/places/' + id, { method: 'DELETE', headers: { 'x-admin-password': PASSWORD } });
   load();
 }
-load();
 </script>
 </body>
 </html>
