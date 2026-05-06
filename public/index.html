@@ -68,6 +68,10 @@ textarea::placeholder { color: #333; }
   </div>
 </div>
 
+
+<button class="btn" id="surpriseBtn" onclick="surprise()" style="background:#1a1a1a;color:#b8f250;border:1px solid #b8f250;margin-bottom:0.5rem;">
+  SURPRISE ME
+</button>
 <button class="btn" id="planBtn" onclick="plan()">PLAN MY NIGHT</button>
 
 <div class="loading" id="loading">
@@ -130,6 +134,23 @@ async function plan() {
   }
 
   btn.disabled = false;
+}
+
+async function surprise() {
+  const now = new Date();
+  const hour = now.getHours();
+  const people = prompt('How many people?', '2');
+  if (!people) return;
+  
+  const timeContext = hour >= 0 && hour < 6 ? 'late night after ' + hour + 'am' :
+    hour >= 6 && hour < 11 ? 'early morning at ' + hour + 'am' :
+    hour >= 11 && hour < 15 ? 'lunchtime at ' + hour + 'pm' :
+    hour >= 15 && hour < 18 ? 'afternoon at ' + hour + 'pm' :
+    hour >= 18 && hour < 22 ? 'early evening at ' + hour + 'pm' :
+    'night at ' + hour + 'pm';
+
+  document.getElementById('vibeInput').value = 'spontaneous plan for ' + people + ' people, ' + timeContext + ', surprise us';
+  plan();
 }
 </script>
 </body>
