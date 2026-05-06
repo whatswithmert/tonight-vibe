@@ -47,7 +47,7 @@ let PASSWORD = '';
 function login() {
   PASSWORD = document.getElementById('password').value;
   fetch('/places', { headers: { 'x-admin-password': PASSWORD } })
-    .then(r => { if (r.ok) { document.getElementById('login-screen').style.display='none'; document.getElementById('main-screen').style.display='block'; load(); } else { alert('Wrong password'); } });
+    .then(r => { if (r.ok) { document.getElementById('login-screen').style.display='none'; document.getElementById('main-screen').style.display='block'; load(); loadEvents(); } else { alert('Wrong password'); } });
 }
 
 async function load() {
@@ -61,13 +61,55 @@ async function load() {
 async function addPlace() {
   const body = { name: document.getElementById('name').value, city: 'Rotterdam', vibe: document.getElementById('vibe').value.split(',').map(s=>s.trim()), music: document.getElementById('music').value.split(',').map(s=>s.trim()), notes: document.getElementById('notes').value, price_level: parseInt(document.getElementById('price').value), open_late: document.getElementById('open_late').value === 'true' };
   await fetch('/admin/places', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-admin-password': PASSWORD }, body: JSON.stringify(body) });
-  load();
+  load(); loadEvents();
 }
 
 async function deletePlace(id) {
   await fetch('/admin/places/' + id, { method: 'DELETE', headers: { 'x-admin-password': PASSWORD } });
-  load();
+  load(); loadEvents();
 }
 </script>
-</body>
+
+<h2 style="font-family:'Bebas Neue',sans-serif;letter-spacing:2px;color:#b8f250;margin-bottom:1rem;font-size:20px;">EVENTS</h2>
+<div class="form">
+  <label>EVENT NAME</label><input id="ename" placeholder="Awakenings Festival" />
+  <label>VENUE</label><input id="evenue" placeholder="Maassilo" />
+  <label>CITY</label><input id="ecity" value="Rotterdam" />
+  <label>DATE (YYYY-MM-DD)</label><input id="edate" placeholder="2026-05-10" />
+  <label>ARTISTS (comma separated)</label><input id="eartists" placeholder="Charlotte de Witte, Amelie Lens" />
+  <label>GENRE (comma separated)</label><input id="egenre" placeholder="techno, house" />
+  <label>PRICE (euros)</label><input id="eprice" type="number" value="15" />
+  <label>TICKET URL</label><input id="eurl" placeholder="https://..." />
+  <br><button onclick="addEvent()">+ Add Event</button>
+</div>
+<div id="events-list"></div>
+<script>
+async function loadEvents() {
+  const res = await fetch('/events');
+  const evs = await res.json();
+  document.getElementById('events-list').innerHTML = evs.length === 0 ? '<p style="color:#444;font-size:12px">No events yet.</p>' : evs.map(e =>
+    '<div class="place-card"><div><strong>' + e.name + '</strong><span style="color:#666;font-size:12px;margin-left:10px">' + e.venue + ' — ' + e.date + '</span></div><button class="delete-btn" onclick="deleteEvent(' + e.id + ')">delete</button></div>'
+  ).join('');
+}
+
+async function addEvent() {
+  const body = {
+    name: document.getElementById('ename').value,
+    venue: document.getElementById('evenue').value,
+    city: document.getElementById('ecity').value,
+    date: document.getElementById('edate').value,
+    artists: document.getElementById('eartists').value.split(',').map(s=>s.trim()),
+    genre: document.getElementById('egenre').value.split(',').map(s=>s.trim()),
+    price: parseInt(document.getElementById('eprice').value),
+    url: document.getElementById('eurl').value
+  };
+  await fetch('/admin/events', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-admin-password': PASSWORD }, body: JSON.stringify(body) });
+  loadEvents();
+}
+
+async function deleteEvent(id) {
+  await fetch('/admin/events/' + id, { method: 'DELETE', headers: { 'x-admin-password': PASSWORD } });
+  loadEvents();
+}
+</script></body>
 </html>

@@ -61,4 +61,28 @@ app.delete('/admin/places/:id', (req, res) => {
   delete require.cache[require.resolve('./places.json')];
   res.json({ ok: true });
 });
+
+const eventsFile = './events.json';
+let events = require(eventsFile);
+
+app.get('/events', (req, res) => {
+  const { city, date } = req.query;
+  let filtered = events;
+  if (city) filtered = filtered.filter(e => e.city === city);
+  if (date) filtered = filtered.filter(e => e.date === date);
+  res.json(filtered);
+});
+
+app.post('/admin/events', (req, res) => {
+  const newEvent = { ...req.body, id: Date.now() };
+  events.push(newEvent);
+  fs.writeFileSync(eventsFile, JSON.stringify(events, null, 2));
+  res.json(newEvent);
+});
+
+app.delete('/admin/events/:id', (req, res) => {
+  events = events.filter(e => e.id !== parseInt(req.params.id));
+  fs.writeFileSync(eventsFile, JSON.stringify(events, null, 2));
+  res.json({ ok: true });
+});
 app.listen(3000, () => console.log("Running"));
