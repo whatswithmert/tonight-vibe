@@ -13,7 +13,9 @@
     ],
     "open_late": true,
     "price_level": 2,
-    "notes": "dirty underground energy, strong crowd"
+    "notes": "dirty underground energy, strong crowd",
+    "category": "nightlife",
+    "pet_friendly": false
   },
   {
     "id": 2,
@@ -30,7 +32,9 @@
     ],
     "open_late": true,
     "price_level": 3,
-    "notes": "converted grain silo, serious acoustics"
+    "notes": "converted grain silo, serious acoustics",
+    "category": "nightlife",
+    "pet_friendly": false
   },
   {
     "id": 3,
@@ -47,7 +51,9 @@
     ],
     "open_late": true,
     "price_level": 3,
-    "notes": "converted grain silo, serious acoustics"
+    "notes": "converted grain silo, serious acoustics",
+    "category": "nightlife",
+    "pet_friendly": false
   },
   {
     "id": 4,
@@ -64,7 +70,9 @@
     ],
     "open_late": true,
     "price_level": 3,
-    "notes": "converted grain silo, serious acoustics"
+    "notes": "converted grain silo, serious acoustics",
+    "category": "nightlife",
+    "pet_friendly": false
   },
   {
     "name": "Memo",
@@ -79,6 +87,8 @@
     "notes": "",
     "price_level": 2,
     "open_late": true,
-    "id": 1778024185063
+    "id": 1778024185063,
+    "category": "nightlife",
+    "pet_friendly": false
   }
 ]
