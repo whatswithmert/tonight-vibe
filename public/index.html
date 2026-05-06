@@ -121,7 +121,7 @@ async function plan() {
     document.getElementById('story').classList.add('on');
 
     document.getElementById('cardList').innerHTML = result.plan.map(p =>
-      '<div class="card"><div class="score">' + Math.round((p.score||0.85)*100) + '</div><div><div class="name">' + p.name + '</div><div class="reason">' + p.reason + '</div></div></div>'
+      '<div class="card"><div class="score">' + Math.min(99, Math.round((p.score||0.85)*100)) + '</div><div><div class="name">' + p.name + '</div><div class="reason">' + p.reason + '</div></div></div>'
     ).join('');
 
     document.getElementById('results').classList.add('on');
