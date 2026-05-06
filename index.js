@@ -21,7 +21,7 @@ app.post("/plan", async (req, res) => {
         model: "claude-haiku-4-5-20251001",
         max_tokens: 1000,
         system: "You are a nightlife expert. Always respond with raw JSON only, no markdown.",
-        messages: [{ role: "user", content: "User wants: " + input + ". Venues: " + JSON.stringify(cityPlaces) + ". Return JSON: {story: string, plan: [{name, reason, score}]}" }]
+        messages: [{ role: "user", content: "User wants: " + input + ". Pick best 3 venues matching the request. Consider category (nightlife/restaurant/breakfast/lunch/coffeeshop/bar/cafe) and pet_friendly field when relevant. Venues: " + JSON.stringify(cityPlaces) + ". Return JSON: {story: string, plan: [{name, reason, score}]}" }]
       })
     });
     const data = await response.json();
