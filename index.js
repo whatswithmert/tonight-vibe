@@ -10,6 +10,7 @@ app.post("/plan", async (req, res) => {
   try {
     const { input, city } = req.body;
     const cityPlaces = places.filter(p => p.city === city);
+  const cityEvents = events.filter(e => e.city === city);
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -21,7 +22,7 @@ app.post("/plan", async (req, res) => {
         model: "claude-haiku-4-5-20251001",
         max_tokens: 1000,
         system: "You are a nightlife expert. Always respond with raw JSON only, no markdown.",
-        messages: [{ role: "user", content: "User wants: " + input + ". Pick best 3 venues matching the request. Consider category (nightlife/restaurant/breakfast/lunch/coffeeshop/bar/cafe) and pet_friendly field when relevant. Venues: " + JSON.stringify(cityPlaces) + ". Return JSON: {story: string, plan: [{name, reason, score}]}" }]
+        messages: [{ role: "user", content: "User wants: " + input + ". Pick best 3 venues matching the request. Consider category (nightlife/restaurant/breakfast/lunch/coffeeshop/bar/cafe) and pet_friendly field when relevant. Venues: " + JSON.stringify(cityPlaces) + ". Upcoming events: " + JSON.stringify(cityEvents) + ". Return JSON: {story: string, plan: [{name, reason, score}]}" }]
       })
     });
     const data = await response.json();
