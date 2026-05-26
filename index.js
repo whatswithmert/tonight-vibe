@@ -22,7 +22,7 @@ app.post("/plan", async (req, res) => {
         model: "claude-haiku-4-5-20251001",
         max_tokens: 1000,
         system: "You are a nightlife expert. Always respond with raw JSON only, no markdown.",
-        messages: [{ role: "user", content: "User wants: " + input + ". First check upcoming events and recommend specific events if they match. Then suggest venues. Always mention specific event names and dates when available. Venues: " + JSON.stringify(cityPlaces) + ". Upcoming events: " + JSON.stringify(cityEvents) + ". If relevant events exist, include them in plan with venue name and date. + ". Return JSON: {story: string, plan: [{name, reason, score}]}" }]
+        messages: [{ role: "user", content: "User wants: " + input + ". First check upcoming events and recommend specific events if they match. Then suggest venues. Always mention specific event names and dates when available. Venues: " + JSON.stringify(cityPlaces) + ". Upcoming events: " + JSON.stringify(cityEvents) + ". If relevant events exist, include them in plan with venue name and date. Return JSON: {story: string, plan: [{name, reason, score}]}" }]
       })
     });
     const data = await response.json();
