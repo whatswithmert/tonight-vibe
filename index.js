@@ -105,7 +105,17 @@ app.post('/admin/upload-events', upload.single('file'), (req, res) => {
     const duplicate = events.find(e => e.venue === venue && e.date === String(date) && e.name === name);
     if (duplicate) { duplicates.push(name + ' on ' + date); return; }
     const artists = row['Artists'] ? String(row['Artists']).split(',').map(s => s.trim()) : [];
-    events.push({ id: Date.now() + added, name, venue, city, date: String(date), artists, price: row['Price (€)'] || 0, url: row['Ticket URL'] || '' });
+    events.push({ 
+      id: Date.now() + added, 
+      name, venue, city, 
+      date: String(date), 
+      time: row['Time'] || '',
+      artists, 
+      description: row['Description'] || '',
+      price: row['Price (€)'] || 0, 
+      url: row['Ticket URL'] || '',
+      location_url: row['Location'] || ''
+    });
     added++;
   });
   fs.writeFileSync(eventsFile, JSON.stringify(events, null, 2));
