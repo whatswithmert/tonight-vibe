@@ -1,3 +1,12 @@
+const { Pool } = require('pg');
+const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
+
+async function initDB() {
+  await pool.query(`CREATE TABLE IF NOT EXISTS places (id SERIAL PRIMARY KEY, name TEXT, city TEXT, category TEXT, vibe TEXT[], music TEXT[], notes TEXT, price_level INT, open_late BOOLEAN, pet_friendly BOOLEAN)`);
+  await pool.query(`CREATE TABLE IF NOT EXISTS events (id SERIAL PRIMARY KEY, name TEXT, venue TEXT, city TEXT, date TEXT, time TEXT, artists TEXT[], description TEXT, price INT, url TEXT, location_url TEXT, UNIQUE(venue, date, name))`);
+}
+initDB();
+
 const express = require("express");
 const app = express();
 app.use(express.json());
