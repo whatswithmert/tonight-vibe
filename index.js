@@ -103,7 +103,7 @@ const multer = require('multer');
 const XLSX = require('xlsx');
 const upload = multer({ storage: multer.memoryStorage() });
 
-app.post('/admin/upload-events', upload.single('file'), (req, res) => {
+app.post('/admin/upload-events', upload.single('file'), async (req, res) => {
   const venue = req.body.venue;
   const city = req.body.city || 'Rotterdam';
   const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
@@ -111,27 +111,17 @@ app.post('/admin/upload-events', upload.single('file'), (req, res) => {
   const rows = XLSX.utils.sheet_to_json(sheet);
   let added = 0;
   let duplicates = [];
-  rows.forEach(row => {
+  for (const row of rows) {
     const date = row['Date (YYYY-MM-DD)'] || row['date'];
     const name = row['Event Name'] || row['name'];
-    if (!date || !name) return;
-    const duplicate = events.find(e => e.venue === venue && e.date === String(date) && e.name === name);
-    if (duplicate) { duplicates.push(name + ' on ' + date); return; }
+    if (!date || !name) continue;
     const artists = row['Artists'] ? String(row['Artists']).split(',').map(s => s.trim()) : [];
-    events.push({ 
-      id: Date.now() + added, 
-      name, venue, city, 
-      date: String(date), 
-      time: row['Time'] || '',
-      artists, 
-      description: row['Description'] || '',
-      price: row['Price (€)'] || 0, 
-      url: row['Ticket URL'] || '',
-      location_url: row['Location'] || ''
-    });
-    added++;
-  });
-  fs.writeFileSync(eventsFile, JSON.stringify(events, null, 2));
+    const result = await pool.query(
+      'INSERT INTO events (name, venue, city, date, time, artists, description, price, url, location_url) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) ON CONFLICT (venue, date, name) DO NOTHING RETURNING *',
+      [name, venue, city, String(date), row['Time']||'', artists, row['Description']||'', row['Price (€)']||0, row['Ticket URL']||'', row['Location']||'']
+    );
+    if (result.rows.length > 0) { added++; } else { duplicates.push(name + ' on ' + date); }
+  }
   res.json({ added, duplicates });
 });
 app.listen(3000, () => console.log("Running"));
