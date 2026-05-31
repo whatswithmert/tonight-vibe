@@ -9,8 +9,10 @@ app.get("/places", (req, res) => { res.json(places); });
 app.post("/plan", async (req, res) => {
   try {
     const { input, city } = req.body;
-    const cityPlaces = places.filter(p => p.city === city);
-  const cityEvents = events.filter(e => e.city === city);
+    const placesResult = await pool.query('SELECT * FROM places WHERE city=$1', [city]);
+  const cityPlaces = placesResult.rows;
+  const eventsResult = await pool.query('SELECT * FROM events WHERE city=$1 ORDER BY date', [city]);
+  const cityEvents = eventsResult.rows;
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -46,44 +48,45 @@ app.use('/admin', (req, res, next) => {
 
 app.use(express.static('public'));
 
-app.post('/admin/places', (req, res) => {
-  const data = require('./places.json');
-  const newPlace = { ...req.body, id: Date.now() };
-  data.push(newPlace);
-  fs.writeFileSync('./places.json', JSON.stringify(data, null, 2));
-  delete require.cache[require.resolve('./places.json')];
-  res.json(newPlace);
+app.post('/admin/places', async (req, res) => {
+  const { name, city, category, vibe, music, notes, price_level, open_late, pet_friendly } = req.body;
+  const result = await pool.query(
+    'INSERT INTO places (name, city, category, vibe, music, notes, price_level, open_late, pet_friendly) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *',
+    [name, city, category||'nightlife', vibe||[], music||[], notes, price_level||2, open_late||false, pet_friendly||false]
+  );
+  res.json(result.rows[0]);
 });
 
-app.delete('/admin/places/:id', (req, res) => {
-  let data = require('./places.json');
-  data = data.filter(p => p.id !== parseInt(req.params.id));
-  fs.writeFileSync('./places.json', JSON.stringify(data, null, 2));
-  delete require.cache[require.resolve('./places.json')];
+app.delete('/admin/places/:id', async (req, res) => {
+  await pool.query('DELETE FROM places WHERE id=$1', [req.params.id]);
   res.json({ ok: true });
 });
 
 const eventsFile = './events.json';
 let events = require(eventsFile);
 
-app.get('/events', (req, res) => {
+app.get('/events', async (req, res) => {
   const { city, date } = req.query;
-  let filtered = events;
-  if (city) filtered = filtered.filter(e => e.city === city);
-  if (date) filtered = filtered.filter(e => e.date === date);
-  res.json(filtered);
+  let q = 'SELECT * FROM events WHERE 1=1';
+  const params = [];
+  if (city) { params.push(city); q += ' AND city=$' + params.length; }
+  if (date) { params.push(date); q += ' AND date=$' + params.length; }
+  q += ' ORDER BY date';
+  const result = await pool.query(q, params);
+  res.json(result.rows);
 });
 
-app.post('/admin/events', (req, res) => {
-  const newEvent = { ...req.body, id: Date.now() };
-  events.push(newEvent);
-  fs.writeFileSync(eventsFile, JSON.stringify(events, null, 2));
-  res.json(newEvent);
+app.post('/admin/events', async (req, res) => {
+  const { name, venue, city, date, time, artists, description, price, url, location_url } = req.body;
+  const result = await pool.query(
+    'INSERT INTO events (name, venue, city, date, time, artists, description, price, url, location_url) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) ON CONFLICT (venue, date, name) DO NOTHING RETURNING *',
+    [name, venue, city, date, time||'', artists||[], description||'', price||0, url||'', location_url||'']
+  );
+  res.json(result.rows[0] || { duplicate: true });
 });
 
-app.delete('/admin/events/:id', (req, res) => {
-  events = events.filter(e => e.id !== parseInt(req.params.id));
-  fs.writeFileSync(eventsFile, JSON.stringify(events, null, 2));
+app.delete('/admin/events/:id', async (req, res) => {
+  await pool.query('DELETE FROM events WHERE id=$1', [req.params.id]);
   res.json({ ok: true });
 });
 
